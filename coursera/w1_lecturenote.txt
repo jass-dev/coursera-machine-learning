@@ -1,4 +1,4 @@
--- cost function intuition
+-- cost function intuition 1
 
 cost function은 우리가 지정한 hypo에 해당하는 function 이다.
 만약 hypothesis를 h(x) = t1X + t0라 하자.
@@ -9,4 +9,20 @@ j(t1) = sigma(blabla)
 우리의 목표는 이 j를 줄이는 것이고, j를 최소화할 수 있는 t1의 값으로 h(x)를 완성시키는 것이다.
 
 
-updated
+-- cost function intuition 2
+
+intuition 1에서는 costfunction이 2차함수꼴로 발생했다.
+이를 보다 자세히 보자. 
+두개의 축이 theta 0, theta 1일경우, 이에대한 j(theta0, theta1)은 3차원의 활처럼 발생할 것이다.
+즉, 등고선의 형태로 적합한 j(theta0, theta1) 값이 분포한다고 볼 수 있다. 이론적으로는 정확히 점에서 일치하는 순간도 있을것.
+
+-- gradient descent
+
+기울기 하강 알고리즘. 주로 사용되는 알고리즘중 하나이다.
+그 내용은 간단하다. parameter에 일정한 초기값을 주고, 그 초기값을 통해 발생하는 cost에 대해 조금씩 줄여나가는 것이다.
+어느정도 greedy하게 내려가는 알고리즘이기때문에, 초기값이 달라지면 도달하는 하강 지점또한 달라질 수 있다.
+
+방식은 다음과 같다.
+thetaj = thetaj - thetaj로 미분한 costfunction값 * 훈련변수
+thetaj에 값에 대해 미분한 costfunction값이 converge 할 경우 기울기 하강은 멈춘다.
+여기서 주의할 것은 다수의 theta (0, 1, 2, ...j)에 대해 동시에 업데이트하고(simultaneously), 동시에 식을 적용해야한다는 것이다.
