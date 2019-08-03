@@ -26,3 +26,4 @@ intuition 1에서는 costfunction이 2차함수꼴로 발생했다.
 thetaj = thetaj - thetaj로 미분한 costfunction값 * 훈련변수
 thetaj에 값에 대해 미분한 costfunction값이 converge 할 경우 기울기 하강은 멈춘다.
 여기서 주의할 것은 다수의 theta (0, 1, 2, ...j)에 대해 동시에 업데이트하고(simultaneously), 동시에 식을 적용해야한다는 것이다.
+
