@@ -1,0 +1,9 @@
+-- cost function intuition
+
+cost function은 우리가 지정한 hypo에 해당하는 function 이다.
+만약 hypothesis를 h(x) = t1X + t0라 하자.
+이때 h는 x의 함수이다. 
+
+이때 cost function은 위의 t1에 대한 function이다. (편의를 위해 t0는 0이라 가정하자)
+j(t1) = sigma(blabla)
+우리의 목표는 이 j를 줄이는 것이고, j를 최소화할 수 있는 t1의 값으로 h(x)를 완성시키는 것이다.
