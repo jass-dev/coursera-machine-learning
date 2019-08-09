@@ -1,29 +1,104 @@
+- WHAT IS MACHINE LEARNING?
+ 1) arthur samuel의 definition : 컴퓨터에게 명시적으로 프로그래밍 하지 않아도 학습할 수 있는 능력을 주는 것. (1959)
+ 2) tom mitchell의 정의 : 업무(T)에 대한 경험(E)로부터 Permance에 대한 수단을 얻고, E를 improve하는것.
+예를들어 스팸메일 분류에 대해서,
+ T: 스팸메일을 분류하는것
+ E: 내가 스팸메일을 분류하는것을 학습하는것.
+ P: 스팸메일을 얼마나 잘 분류하였는지에 대한 측정
+
+MACHINE LEARNING 알고리즘은 크게 둘이다.
+지도학습과 자율학습.
+그외에는 강화학습이나 recommender system 등이 있다.
+
+가장 중요한것은 내가 사용해야하는 시스템특성에 어떤 알고리즘이 가장 적합한지 정하는 것이다.
+
+
+- SUPERVISED LEARNING(지도학습)
+기계학습 알고리즘에 정답이 포함된 데이터 집합을 제공한다.
+실제 벌어진 일에 대한 관측값이 정확히 발생할때 사용할 수 있을 것이다.
+이런 문제는 regression problem, classification problem과 연결된다. 실제 상황을 주고 이를 예측하여 답을 뱉어주는 것. 둘의 차이는 연속과 불연속의 차이이다.
+
+이런 문제에서는 종속으로 작용할 수 있는 특성의 수가 있을 것이다. 예를들어, 종양의 크기와 암의 양성 악성 문제. 여기서는 종양의 크기가 특성으로 1개뿐이지만, 그 수가 많아진다면 데이터적인/로직적인 어려움이 있을것이다.
+
+이를 해결해줄 수 있는 방법중 하나가 SVM(support vector machine) 방법이다.
+
+- UNSUPERVISED LEARNING(비지도학습, 자율학습)
+데이터의 집합을 제공하지만, 그것에 대한 정보는 제공되지 않는다.
+이런 문제에서, 데이터가 무엇인지는 알 수 없다. 그저 그 데이터들의 군집을 나눠주는것.
+이를 clustering이라 부른다. 이러한 학습방법은 필연적으로 많은 양의 데이터를 요한다.
+
+예를들면 방대한 양의 기사를 특정 토픽들의 그룹으로 나눈다던가, 고객집단을 세분화하는 등의 일에 사용될 수 있다.
+
+- MODEL representation
+supervised learning에 주로 쓰인다. feature(x) 와 target(y)간의 관계를 설명하려하는 것이다. 이 모델은 h로 표현 가능할 것이다.(hypothesis)
+결국 model이란 적정한 h(x)를 통하여 y라고 말하는것.
+만약 h가 일차식이라고 가정한다면, htheta(x) = theta0 + theta1 x가 될것. 어떤 theta라는 변수에 의한 선형함수라는 의미이다.
+
+- cost function
+그렇다면 모델함수는 어떻게 생각하게될것인가?여러가지 모델이 가능한데 그중 어떤 모델이 가장 적합한지를 계산해야할것이다. 이를 계산하기위해, cost function이라는 개념이 도입된다.
+이 모델의 비요을 계산할 수 있는 function이며, 회귀모델에서는 주로 최소 오차 제곱합이 사용된다. (SSE)
+이 cost function은 간단하지만 대부분의 경우에서 reasonable하게 적용된다.
+
+
 -- cost function intuition 1
 
-cost function�� �츮�� ������ hypo�� �ش��ϴ� function �̴�.
-���� hypothesis�� h(x) = t1X + t0�� ����.
-�̶� h�� x�� �Լ��̴�. 
+cost function은 우리가 지정한 hypo에 해당하는 function 이다.
+만약 hypothesis를 h(x) = t1X + t0라 하자.
+이때 h는 x의 함수이다. 
 
-�̶� cost function�� ���� t1�� ���� function�̴�. (���Ǹ� ���� t0�� 0�̶� ��������)
+이때 cost function은 위의 t1에 대한 function이다. (편의를 위해 t0는 0이라 가정하자)
 j(t1) = sigma(blabla)
-�츮�� ��ǥ�� �� j�� ���̴� ���̰�, j�� �ּ�ȭ�� �� �ִ� t1�� ������ h(x)�� �ϼ���Ű�� ���̴�.
+우리의 목표는 이 j를 줄이는 것이고, j를 최소화할 수 있는 t1의 값으로 h(x)를 완성시키는 것이다.
 
 
 -- cost function intuition 2
 
-intuition 1������ costfunction�� 2���Լ��÷� �߻��ߴ�.
-�̸� ���� �ڼ��� ����. 
-�ΰ��� ���� theta 0, theta 1�ϰ��, �̿����� j(theta0, theta1)�� 3������ Ȱó�� �߻��� ���̴�.
-��, ������� ���·� ������ j(theta0, theta1) ���� �����Ѵٰ� �� �� �ִ�. �̷������δ� ��Ȯ�� ������ ��ġ�ϴ� ������ ������.
+intuition 1에서는 costfunction이 2차함수꼴로 발생했다.
+이를 보다 자세히 보자. 
+두개의 축이 theta 0, theta 1일경우, 이에대한 j(theta0, theta1)은 3차원의 활처럼 발생할 것이다.
+즉, 등고선의 형태로 적합한 j(theta0, theta1) 값이 분포한다고 볼 수 있다. 이론적으로는 정확히 점에서 일치하는 순간도 있을것.
 
 -- gradient descent
 
-���� �ϰ� �˰�����. �ַ� ���Ǵ� �˰������� �ϳ��̴�.
-�� ������ �����ϴ�. parameter�� ������ �ʱⰪ�� �ְ�, �� �ʱⰪ�� ���� �߻��ϴ� cost�� ���� ���ݾ� �ٿ������� ���̴�.
-������� greedy�ϰ� �������� �˰������̱⶧����, �ʱⰪ�� �޶����� �����ϴ� �ϰ� �������� �޶��� �� �ִ�.
+기울기 하강 알고리즘. 주로 사용되는 알고리즘중 하나이다.
+그 내용은 간단하다. parameter에 일정한 초기값을 주고, 그 초기값을 통해 발생하는 cost에 대해 조금씩 줄여나가는 것이다.
+어느정도 greedy하게 내려가는 알고리즘이기때문에, 초기값이 달라지면 도달하는 하강 지점또한 달라질 수 있다.
 
-����� ������ ����.
-thetaj = thetaj - thetaj�� �̺��� costfunction�� * �Ʒú���
-thetaj�� ���� ���� �̺��� costfunction���� converge �� ��� ���� �ϰ��� �����.
-���⼭ ������ ���� �ټ��� theta (0, 1, 2, ...j)�� ���� ���ÿ� ������Ʈ�ϰ�(simultaneously), ���ÿ� ���� �����ؾ��Ѵٴ� ���̴�.
+방식은 다음과 같다.
+thetaj = thetaj - thetaj로 미분한 costfunction값 * 훈련변수
+thetaj에 값에 대해 미분한 costfunction값이 converge 할 경우 기울기 하강은 멈춘다.
+여기서 주의할 것은 다수의 theta (0, 1, 2, ...j)에 대해 동시에 업데이트하고(simultaneously), 동시에 식을 적용해야한다는 것이다.
 
+-- gradient descent intuition
+
+위 식을 보자.
+thetaj = thetaj - thetaj로 미분한 costfunction값 * 훈련변수 alpha
+간단하게, 2차함수를 생각해보자.
+최소점을 기준으로 좌측의 미분계수는 음수로, 우측의 미분계수는 양수로 나타날것.
+좌측에 잡혔을경우, 음수를 빼게 되므로 값이 더 커진다. 이때 thetaj는 증가한다. 
+우측에 잡혔을경우, 양수를 빼게되는데 이에따라 thetaj는 감소한다.
+이때 이동하는 크기는 alpha에 의해 결정되는데, 너무 작을경우 한참 움직일 것이고 너무 클 경우 정확한 minimum point에 정착할 수 없다. 좌우로 계속 움직일것이기 때문.
+그러나 적당한 alpha만 정해진다면, 미분계수값은 minimum에 접근할수록 줄어든다. 그러니 alpha를 굳이 줄일 필요는 없다.
+
+-- gradient descent for linear regression
+
+결국 linear regression은 위 내용을 결합한 것이다.
+y = theta0 + theta1*x라고 하면
+이에대한 cost function을 찾고, 이를 기울기 하강을 통해 진행하다보면 답이 나온다.
+linear regression은 함수의 형태가 convex하므로, 전역적 minimum값을 가지므로, 하나의 답이 나온다.
+
+이런 하강 기울기 알고리즘은 반복적으로 많은 횟수를 수행하므로, 나중에는 다른 방법을 제시하기도 한다. (반복 최소 이승법)
+
+
+-- linear algebra 전체
+
+matrix와 vector에 대해서. 적당히 아는만큼 듣자.
+matrix : 보통 두개의 axis를 가지는 데이터 집합. Aij 식으로 호출한다. n*m이 차원이 된다.
+vector : 행만 있고 컬럼이 없는 데이터집합. Ai 식으로 호출한다. n이 차원이 된다.
+
+덧셈 뺄셈시에는 차원에 맞춰서 수행하며, 곱셈과 나눗셈시에는 scalar는 각 element와의 연산, 행렬식일경우 차원에 맞추어 연산한다.
+
+이런 행렬곱셈은 dataset과 hypothesis를 이용해 예측값을 빠르고 쉽게 계산할 수 있으며, 행렬연산의 특성상 멀티코어로 빠르게 돌릴 수 있어 유리하다.
+
+행렬 계산에서는 교환법칙이 성립하지 않으나, 결합법칙은 성립한다. 항등원이 존재하며, 항등행렬은 주로 E로 표현한다.(프로그램 메소드로 eye라는 것이 있다(octave))
+항등행열, 역행렬, 전치행렬 정도의 개념만 기억나면 됨.
