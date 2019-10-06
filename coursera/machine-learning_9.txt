@@ -1,0 +1,134 @@
+- anomaly detection vs supervised learning
+
+앞서 우리는 anomaly에 대해서 1,0으로 표시하여(마치 supervised learning처럼) anomaly 처리를 했다.
+그러면, 그냥 supervised learning을 쓰지 뭣하러 anomaly detection을 쓰는가?
+이번시간에는 이런 케이스들에 대해서 supervised learning과 anomaly detection간의 차이와 어떤 것이 더 유리한지에 대해 볼것이다.
+
+anomaly detection은 다음 특성을 가진다.
+매우 적은 sample만이 anomaly이다. 반면, 매우 많은 sample이 정상이다. 즉, 매우 skewed하다.
+또한, anomaly가 의미하는것은 매우 다양한 type이 가능하다. 따라서, 알고리즘으로 분석하기가 어렵다.
+그리고 지금 발생한 anomaly가 차후에 발생할 anomaly와 유사하다는 보장이 없다.
+
+supervised learning은 많은 sample이 positive하고, 또한 많은 sample이 negative하다.
+지금 충분히 많은 sample로 positive와 negative에 대한 insight를 얻을 수 있다면,
+차후에 발생하는 sample들에 또한 이 로직을 적용할 수 있다.
+
+기존에 spam mail 분류에 대해 한적이 있다.
+그때 spam mail또한 매우 skewed 했지만, 매우 많은 positive와 negative sample을 얻을 수 있었다.
+그래서 supervised learning으로 진행할 수 있엇던것.
+
+
+- choosing what features to use
+
+anomaly detection을 위해 어떤 feature를 선택해야하는가?
+
+1. feature의 분포를 확인해보자.
+먼저 feature에 대한 histogram을 찍어봐야할 것이다. 
+찍어서 정규분포라면, 땡큐! 바로 쓰면 된다.
+근데 만약 정규분포가 아니면? 고민을 해봐야한다. 
+어떻게 처리할것인가? 이에 대해서 적당한 logic을 적용해주는 것이 좋다. e.g.) x -> logx, x -> x^.5
+
+2. 실제로 anomaly인 데이터가 충분히 작은 확률로 나타나거나, 충분히 큰 확률로 나타나는 feature.
+그래야 구분이 되지.
+만약 한개의 feature로 구분되지 않는다면, 다른 feature까지 포함하여 combine 후 낮은 probability를 산출하는 모델로 만들어야한다.
+
+3. 의심되는 케이스에 맞는 feature를 생성한다. 만약 x_1과 x_2가 있을때, 어떤 anomaly가 x_1의 증가치가 x_2의 증가치보다 급격하다면,
+새로운 feature는 x_1 / x_2 라는 식으로 만들어질 수 있다.
+
+
+- multivariate gaussian distribution
+
+additional한 내용이다.
+위 방법으로 anomaly를 측정한다고 하자. 그런데 이 방법으로는 잡을 수 없는 anomaly가 존재한다.
+예를들어, x_1과 x_2가 비례하여 증가, 감소한다고 할때, x_1이 작고 x_2는 큰 sample을 생각해보자.
+그런데 이 x_1값과 x_2 값이 너무 작진 않아서, 각각의 x_1 gaussian anomaly에는 해당하지 않고, x_2 gaussain anomaly에는 해당하지 않느다고 생각해보자.
+이 경우, 우리는 각각의 anomaly에 속하지 않으므로 anomaly detection이 불가능하다.
+
+이 경우, 우리는 p(x_1), p(x_2)...방식으로 seprate 하게 모델을 설정하는 것이 아니라, 이것들을 전부 하나로 모아서 하는 방법을 생각해볼 수 있다.
+기존의 p(x_1 ; mu_x1, sigma_x1)이라는 모델이였다면, 모든걸 통합한 모델은 p(x ; MU, SIGMA)라고 할 수 있겠다.
+이때 MU는 nVector, SIGMA는 n*nMATRICS로 각각 평균과 covariance를 의미한다.
+
+feature가 2개라고 가정해보자. 이때의 모양을 그리면 3차원 bell shaped로 나올 것이며, 이 bell의 높이가 probability가 될 것이다.
+이때의 bell은 MU에 의해 중심이 정해지고 SIGMA 값이 클수록 넓고 완만한 종모양이 된다.
+각각의 feature에 따라 분산은 다를 수 있으므로, bell shaped의 단면은 반드시 circle이 아닌 oval한 케이스도 보인다.
+
+또한 SIGMA matrics의 값에 따라 양의 상관관계, 음의 상관관계도 있다.
+SIGMA matrics가 [1 0 ; 0 1]은 별도의 상관관계가 없는 완전한 circle형이 나타나며
+[1 -0.5 ; -0.5 1]과 [1 -0.8 ; -0.8 1]은 음의 상관관계를 나타낸다. (-0.8의 상관관계가 더 강하다)
+반대의 케이스는 양의 상관관계를 나타낸다. 당연히.
+
+- anomaly detection using the multivariate gaussian distribution
+
+위의 MU와 SIGMA를 얻는 방법을 보자.
+
+MU : 1/m * summation(i=1~m, x_i)
+SIGMA = 1/m * summation(i=1~m, (x_i - mu) * (x_i - m)')
+
+이 SIGMA 식은 PCA에서 사용했던 식과 같다.
+
+multivariate 모델 anomaly detection과 기존의 anomaly detection을 비교해보자.
+기존모델은 p(x_1 ; mu_1, sigma_1) * p(x_2 ; mu_2, sigma_2)....p(x_n ; mu_n, sigma_n) < epsilon을 의미한다.
+multivariate 모델은 p(x ; MU, SIGMA) < epsilon 이다.
+이 두 모델은 SIGMA의 diagonal 이 sigma_1^2, sigma_2^2...sigma_n^2이고, 그외 모든 값이 0인 케이스에서 완전히 같다.
+이 말인 즉, multivariate를 사용할 수만 있으면 기존 모델을 포함해서 anomaly detection이 가능하다는 의미다.
+
+multivariate를 사용하면 feature간의 correlation을 측정하고 이 관점에서 anomaly를 자동으로 측정해주지만,
+계산이 훨신 expensive하다.
+또한, SIGMA^-1이 들어가기 때문에, m>n이 성립해야된다. 그렇지 않을경우, SIGMA가 non-invertible한 문제가 있을 수 있다.
+일반적으로 m>=10n 이상 되어야 reasonable하게 사용할 수 있다.
+그리고, feature를 중복으로 사용하거나, 기존 feature의 단순 합, 곱 등으로 이루어진 feature를 추가하는 경우 제대로 작동하지 않을 수 있다.
+그외에는 multivariate가 훨 좋은것같다.
+
+
+- content based recommendation
+
+recommender system 구축을 위해 배경내용을 정리해보자.
+1. user수를 n으로(n개 컬럼) 
+2. 영화수를 m으로(m개 로우)
+3. arr(m,n)이 ?일경우 그 영화를 보지 않았음.
+
+이런 설정을 감안하고 content based recommendation을 보자.
+먼저 어떤 영화 x에 대해 그 x가 어떤 영화인지 판단해야한다.
+이를위해, x를 판단할 feature x_1, x_2,...등등을 생각해볼 수 있다.
+각각의 feature는 장르를 나타낸다. 어떤 feature의 값이 높으냐에 따라 거기에 속하는 장르라는 뜻.
+이렇게 설정할경우, x는 vector로 나타난다.
+
+이런식의 모형을 만들었을때, 이는 linear regression에 대한 머신러닝 케이스와 유사하다.
+즉, romance에는 5점을 주고, action에는 0점을 주는 A유저가 있다고 해보자.
+이때 movie i는 romance가 0.99, action이 0이라는 feature를 가진다.
+즉, movie i를 표현하는 vector는 [1; 0.99; 0]이라 할 수 있다. 1은 intercepter이다.
+여기에 A유저의 케이스를 곱하면, [1 0.99 0] * [0; 5; 0;] = 4.95
+( = theta(j)'*x(i), theta는 개인의 선호도, x는 영화의 속성. 순서는 바뀌어도 노상관)
+즉, theta(j)'*x(i)가 그들의 별점, 즉 예측값 y_hat이된다.
+
+결국 결론은 theta j를 찾아내는 일이다.
+이는 supervised learning과 유사하다. 다양한 영화들의 속성을 알아내고, 그에대한 개인의 별점을 안다면 구할 수 있다.
+그 방법은 예전에 한 그거랑 똑같음.
+단 모든 user에 대해 해줘야한다는것만 다른 정도.
+
+- collaborative filtering
+
+앞의 case에서 우리는 movie에 대한 속성값을 가지고, 각각 user가 준 점수를 가지고 있었다.
+그런데, 현실적으로 생각해보자. 우리는 어떤 영화의 속성값을 알 수 없다.
+
+이번엔 반대로 해보자.
+영화의 속성을 추정해보는 것.
+대신, 각각의 user가 어떤 취향을 가지고 있는지를 알아야한다. 즉, theta를 알아야한다.
+theta가 주어져있다면, 이를 이용해 x vector를 얻을 수 있을 것이다.
+
+결국 위 케이스랑 같다.
+* 다만 다른점이 하나 있다. 바로 regularizaion term이다.
+위에서는 theta에 대해 learn하는 문제였기에 theta가 regularization term에 들어갔지만,
+아래에선느 x에 대해 learn하는 문제이기 때문에 x가 regularization term에 들어간다.
+
+
+- collaborative filtering algorithm
+
+앞서 theta와 x에 따라 minimization하는 문제를 봤었다.
+이제 이 둘을 합쳐서 해보자. x와 theta 둘다에 대한 식으로 만들어줄 수 있다.
+
+1. x와 theta를 random하게 initialize한다.
+2. J를 줄이고 gradient descent를 이용해서 theta와 x를 줄인다.
+이때 gradient식은 x에대해서, theta에 대해서 다르다.
+
+-implementational detail : mean normalization
